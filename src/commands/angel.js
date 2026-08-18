@@ -1,30 +1,46 @@
 /**
  * SAIYAN V6 — /سايان — رسائل تلقائية مع نظام مراقبة ذكي
  * Copyright © 2026 Magnus
+ *
  * ✦ يتوقف بعد 3 رسائل متتالية دون تفاعل بشري
  * ✦ يستأنف تلقائياً عند وصول رسالة جديدة
  * ✦ يبدأ مراقبة الصمت بعد التوقف
  * ✦ يغادر بعد 16 دقيقة من الصمت
  */
+
 "use strict";
 
-const fs   = require("fs-extra");
+const fs = require("fs-extra");
 const path = require("path");
 
-const DATA = path.join(process.cwd(), "database/data/saiyanData.json");
+const DATA = path.join(
+  process.cwd(),
+  "database/data/saiyanData.json"
+);
+
 const SILENCE_MS = 16 * 60 * 1000;
 
 function load() {
   try {
-    if (fs.existsSync(DATA))
-      return JSON.parse(fs.readFileSync(DATA, "utf8"));
+    if (fs.existsSync(DATA)) {
+      return JSON.parse(
+        fs.readFileSync(DATA, "utf8")
+      );
+    }
   } catch (_) {}
+
   return {};
 }
 
 function save(data) {
-  fs.ensureDirSync(path.dirname(DATA));
-  fs.writeFileSync(DATA, JSON.stringify(data, null, 2));
+  fs.ensureDirSync(
+    path.dirname(DATA)
+  );
+
+  fs.writeFileSync(
+    DATA,
+    JSON.stringify(data, null, 2)
+  );
 }
 
 function rand(min, max) {
@@ -35,7 +51,8 @@ function rand(min, max) {
 // GLOBAL STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-if (!global.GoatBot) global.GoatBot = {};
+if (!global.GoatBot)
+  global.GoatBot = {};
 
 if (!global.GoatBot.saiyanIntervals)
   global.GoatBot.saiyanIntervals = {};
@@ -57,26 +74,51 @@ if (!global._saiyanListenerRegistered) {
 
   global._saiyanListenerRegistered = true;
 
-  global._msgListeners.push(({ threadID, messageID }) => {
+  global._msgListeners.push(
+    ({ threadID, messageID }) => {
 
-    const tid = String(threadID);
-    const state = global._saiyanState[tid];
+      const tid = String(threadID);
 
-    if (!state) return;
+      const state =
+        global._saiyanState[tid];
 
-    state.consecutive = 0;
-    state.lastHumanTs = Date.now();
+      if (!state)
+        return;
 
-    if (messageID)
-      state.lastHumanMessageID = String(messageID);
+      state.consecutive = 0;
+      state.lastHumanTs = Date.now();
 
-    // استئناف النظام
-    if (state.paused) {
+      if (messageID) {
+        state.lastHumanMessageID =
+          String(messageID);
+      }
 
-      state.paused = false;
-      state.pausedAt = null;
+      // ─────────────────────────────────
+      // استئناف النظام
+      // ─────────────────────────────────
 
-      clearSilenceWatchdog(tid);
+      if (state.paused) {
+
+        state.paused = false;
+        state.pausedAt = null;
+
+        clearSilenceWatchdog(tid);
+
+        const data = load();
+        const td = data[tid];
+
+        if (
+          td?.active &&
+          global.GoatBot?.fcaApi
+        ) {
+
+          scheduleNext(
+            global.GoatBot.fcaApi,
+            tid,
+            td
+          );
+        }
+      }
 
       const data = load();
       const td = data[tid];
@@ -85,27 +127,14 @@ if (!global._saiyanListenerRegistered) {
         td?.active &&
         global.GoatBot?.fcaApi
       ) {
-        scheduleNext(
+
+        scheduleSilenceWatchdog(
           global.GoatBot.fcaApi,
-          tid,
-          td
+          tid
         );
       }
     }
-
-    const data = load();
-    const td = data[tid];
-
-    if (
-      td?.active &&
-      global.GoatBot?.fcaApi
-    ) {
-      scheduleSilenceWatchdog(
-        global.GoatBot.fcaApi,
-        tid
-      );
-    }
-  });
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,32 +174,38 @@ function sendSaiyanLeave(api, tid, state) {
 
   return (async () => {
 
-    // ───────────────────────────────────────────────────────────────────────
-    // الرسالة الختامية قبل المغادرة
-    // ───────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────
+    // الرسالة الختامية
+    // ─────────────────────────────────────
 
     try {
 
-      await new Promise((resolve, reject) => {
+      await new Promise(
+        (resolve, reject) => {
 
-        api.sendMessage(
-          "ﭑﭑلَـڨَـ📜⍣⃟ـﹻ۪۫٘ہـ𝑯ـٰٰٰٰٖٖٖٖٖﹻ۪┇ـےـ❄️ـ┇بَِـ⥢🪽⥤ـےـٰٰٰٰٖٖٖٖٖ𝐁ـޢـٰٰٰٰٖٖٖٖٖޢـة ني. ك اMك در. ويش",
-          tid,
-          err => err ? reject(err) : resolve()
-        );
+          api.sendMessage(
+            "ﭑﭑلَـڨَـ📜⍣⃟ـﹻ۪۫٘ہـ𝑯ـٰٰٰٰٖٖٖٖٖﹻ۪┇ـےـ❄️ـ┇بَِـ⥢🪽⥤ـےـٰٰٰٰٖٖٖٖٖ𝐁ـޢـٰٰٰٰٖٖٖٖٖޢـة ني. ك اMك در. ويش",
+            tid,
+            err =>
+              err
+                ? reject(err)
+                : resolve()
+          );
 
-      });
+        }
+      );
 
     } catch (_) {}
 
-    // انتظار بسيط قبل الخروج
+    // انتظار قبل الخروج
     await new Promise(
-      resolve => setTimeout(resolve, 1500)
+      resolve =>
+        setTimeout(resolve, 1500)
     );
 
-    // ───────────────────────────────────────────────────────────────────────
-    // خروج البوت من المجموعة
-    // ───────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────
+    // خروج البوت
+    // ─────────────────────────────────────
 
     try {
 
@@ -180,15 +215,20 @@ function sendSaiyanLeave(api, tid, state) {
         ""
       );
 
-      await new Promise((resolve, reject) => {
+      await new Promise(
+        (resolve, reject) => {
 
-        api.removeUserFromGroup(
-          botID,
-          String(tid),
-          err => err ? reject(err) : resolve()
-        );
+          api.removeUserFromGroup(
+            botID,
+            String(tid),
+            err =>
+              err
+                ? reject(err)
+                : resolve()
+          );
 
-      });
+        }
+      );
 
     } catch (error) {
 
@@ -204,8 +244,8 @@ function sendSaiyanLeave(api, tid, state) {
       if (data[tid]) {
 
         data[tid].active = false;
-        save(data);
 
+        save(data);
       }
 
       delete global._saiyanState[tid];
@@ -231,52 +271,66 @@ function scheduleSilenceWatchdog(api, tid) {
     !state ||
     state.leaving ||
     !state.paused
-  ) return;
+  ) {
+    return;
+  }
 
   const elapsed =
     Date.now() -
     (state.pausedAt || Date.now());
 
   const remaining =
-    Math.max(0, SILENCE_MS - elapsed);
+    Math.max(
+      0,
+      SILENCE_MS - elapsed
+    );
 
   global.GoatBot.saiyanSilenceTimers[key] =
-    setTimeout(async () => {
+    setTimeout(
+      async () => {
 
-      delete global.GoatBot.saiyanSilenceTimers[key];
+        delete
+          global.GoatBot
+            .saiyanSilenceTimers[key];
 
-      const fresh = load()[key];
-      const current =
-        global._saiyanState[key];
+        const fresh =
+          load()[key];
 
-      if (
-        !fresh?.active ||
-        !current ||
-        current.leaving ||
-        !current.paused
-      ) return;
+        const current =
+          global._saiyanState[key];
 
-      if (
-        Date.now() -
-        (current.pausedAt || Date.now()) <
-        SILENCE_MS
-      ) {
+        if (
+          !fresh?.active ||
+          !current ||
+          current.leaving ||
+          !current.paused
+        ) {
+          return;
+        }
 
-        scheduleSilenceWatchdog(
+        if (
+          Date.now() -
+          (current.pausedAt || Date.now()) <
+          SILENCE_MS
+        ) {
+
+          scheduleSilenceWatchdog(
+            api,
+            key
+          );
+
+          return;
+        }
+
+        await sendSaiyanLeave(
           api,
-          key
+          key,
+          current
         );
 
-        return;
-      }
-
-      await sendSaiyanLeave(
-        api,
-        key,
-        current
-      );
-
-    }, remaining);
+      },
+      remaining
+    );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -294,123 +348,159 @@ function scheduleNext(api, tid, td) {
   if (
     !td?.active ||
     !td?.message
-  ) return;
+  ) {
+    return;
+  }
 
   if (!global._saiyanState[tid]) {
 
     global._saiyanState[tid] = {
-      consecutive: 0,
-      paused: false,
-      pausedAt: null,
-      lastHumanTs: Date.now(),
-      lastHumanMessageID: null,
-      leaving: false
-    };
 
+      consecutive: 0,
+
+      paused: false,
+
+      pausedAt: null,
+
+      lastHumanTs: Date.now(),
+
+      lastHumanMessageID: null,
+
+      leaving: false
+
+    };
   }
 
   if (
     global._saiyanState[tid].paused
-  ) return;
+  ) {
+    return;
+  }
 
-  const ms = Math.round(
-    rand(
-      td.minSeconds ?? 60,
-      td.maxSeconds ??
-      td.minSeconds ??
-      60
-    ) * 1000
-  );
+  const ms =
+    Math.round(
+      rand(
+        td.minSeconds ?? 60,
+        td.maxSeconds ??
+          td.minSeconds ??
+          60
+      ) * 1000
+    );
 
   global.GoatBot.saiyanIntervals[tid] =
-    setTimeout(async () => {
+    setTimeout(
+      async () => {
 
-      delete global.GoatBot.saiyanIntervals[tid];
+        delete
+          global.GoatBot
+            .saiyanIntervals[tid];
 
-      const fresh = load()[tid];
+        const fresh =
+          load()[tid];
 
-      if (!fresh?.active)
-        return;
+        if (!fresh?.active)
+          return;
 
-      const state =
-        global._saiyanState[tid] || {};
+        const state =
+          global._saiyanState[tid] || {};
 
-      // بعد 3 رسائل بدون تفاعل
-      if (
-        (state.consecutive || 0) >= 3
-      ) {
+        // ─────────────────────────────
+        // بعد 3 رسائل بدون تفاعل
+        // ─────────────────────────────
 
-        state.paused = true;
-        state.pausedAt = Date.now();
+        if (
+          (state.consecutive || 0) >= 3
+        ) {
 
-        global._saiyanState[tid] = state;
+          state.paused = true;
 
-        scheduleSilenceWatchdog(
-          api,
-          tid
-        );
+          state.pausedAt =
+            Date.now();
 
-        return;
-      }
+          global._saiyanState[tid] =
+            state;
 
-      // إرسال الرسالة
-      try {
+          scheduleSilenceWatchdog(
+            api,
+            tid
+          );
 
-        const delay =
-          global.utils?.calcHumanTypingDelay?.(
-            fresh.message
-          ) || 1500;
+          return;
+        }
 
-        await global.utils?.simulateTyping?.(
+        // ─────────────────────────────
+        // إرسال الرسالة
+        // ─────────────────────────────
+
+        try {
+
+          const delay =
+            global.utils
+              ?.calcHumanTypingDelay
+              ?.(
+                fresh.message
+              ) || 1500;
+
+          await global.utils
+            ?.simulateTyping
+            ?.(
+              api,
+              tid,
+              delay
+            );
+
+          await api.sendMessage(
+            fresh.message,
+            tid
+          );
+
+          state.consecutive =
+            (state.consecutive || 0) + 1;
+
+          global._saiyanState[tid] =
+            state;
+
+        } catch (_) {}
+
+        const next =
+          load()[tid];
+
+        if (!next?.active)
+          return;
+
+        // ─────────────────────────────
+        // التوقف بعد الرسالة الثالثة
+        // ─────────────────────────────
+
+        if (
+          (state.consecutive || 0) >= 3
+        ) {
+
+          state.paused = true;
+
+          state.pausedAt =
+            Date.now();
+
+          global._saiyanState[tid] =
+            state;
+
+          scheduleSilenceWatchdog(
+            api,
+            tid
+          );
+
+          return;
+        }
+
+        scheduleNext(
           api,
           tid,
-          delay
+          next
         );
 
-        await api.sendMessage(
-          fresh.message,
-          tid
-        );
-
-        state.consecutive =
-          (state.consecutive || 0) + 1;
-
-        global._saiyanState[tid] =
-          state;
-
-      } catch (_) {}
-
-      const next = load()[tid];
-
-      if (!next?.active)
-        return;
-
-      // التوقف مباشرة بعد الرسالة الثالثة
-      if (
-        (state.consecutive || 0) >= 3
-      ) {
-
-        state.paused = true;
-        state.pausedAt = Date.now();
-
-        global._saiyanState[tid] =
-          state;
-
-        scheduleSilenceWatchdog(
-          api,
-          tid
-        );
-
-        return;
-      }
-
-      scheduleNext(
-        api,
-        tid,
-        next
-      );
-
-    }, ms);
+      },
+      ms
+    );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -426,24 +516,35 @@ function restoreAll(api) {
 
   const data = load();
 
-  for (const [tid, td] of Object.entries(data)) {
+  for (
+    const [tid, td]
+    of Object.entries(data)
+  ) {
 
     if (
       td.active &&
       td.message
     ) {
 
-      if (!global._saiyanState[tid]) {
+      if (
+        !global._saiyanState[tid]
+      ) {
 
         global._saiyanState[tid] = {
-          consecutive: 0,
-          paused: false,
-          pausedAt: null,
-          lastHumanTs: Date.now(),
-          lastHumanMessageID: null,
-          leaving: false
-        };
 
+          consecutive: 0,
+
+          paused: false,
+
+          pausedAt: null,
+
+          lastHumanTs: Date.now(),
+
+          lastHumanMessageID: null,
+
+          leaving: false
+
+        };
       }
 
       scheduleNext(
@@ -460,9 +561,7 @@ function restoreAll(api) {
           api,
           tid
         );
-
       }
-
     }
   }
 }
@@ -497,10 +596,12 @@ module.exports = {
       "نظام سايان للإرسال التلقائي والمراقبة الذكية",
 
     guide: {
+
       en:
         "{pn} [رسالة] [min] [max] — تشغيل النظام\n" +
         "{pn} off — إيقاف النظام\n" +
         "{pn} status — عرض الحالة"
+
     }
 
   },
@@ -520,11 +621,12 @@ module.exports = {
     const data = load();
 
     const sub =
-      (args[0] || "").toLowerCase();
+      (args[0] || "")
+        .toLowerCase();
 
-    // ─────────────────────────────────
+    // ─────────────────────────────
     // STATUS
-    // ─────────────────────────────────
+    // ─────────────────────────────
 
     if (
       !sub ||
@@ -532,14 +634,14 @@ module.exports = {
       sub === "حالة"
     ) {
 
-      const td = data[tid];
+      const td =
+        data[tid];
 
       if (!td?.active) {
 
         return message.reply(
           "🌑 نظام سايان غير نشط في هذه المجموعة حالياً."
         );
-
       }
 
       const state =
@@ -562,12 +664,11 @@ module.exports = {
         `╚══════════════════════════════╝`
 
       );
-
     }
 
-    // ─────────────────────────────────
+    // ─────────────────────────────
     // OFF
-    // ─────────────────────────────────
+    // ─────────────────────────────
 
     if (
       sub === "off" ||
@@ -579,29 +680,30 @@ module.exports = {
         global.GoatBot.saiyanIntervals[tid]
       );
 
-      delete global.GoatBot.saiyanIntervals[tid];
+      delete
+        global.GoatBot
+          .saiyanIntervals[tid];
 
       clearSilenceWatchdog(tid);
 
-      delete global._saiyanState[tid];
+      delete
+        global._saiyanState[tid];
 
       if (data[tid]) {
 
         data[tid].active = false;
 
         save(data);
-
       }
 
       return message.reply(
         "🧊 تم إيقاف نظام سايان وإلغاء الإرسال التلقائي."
       );
-
     }
 
-    // ─────────────────────────────────
+    // ─────────────────────────────
     // ACTIVATE
-    // ─────────────────────────────────
+    // ─────────────────────────────
 
     const nums =
       args.filter(
@@ -617,7 +719,9 @@ module.exports = {
       );
 
     const msg =
-      textParts.join(" ").trim() ||
+      textParts
+        .join(" ")
+        .trim() ||
       data[tid]?.message ||
       "⚡ سايان حاضر...";
 
