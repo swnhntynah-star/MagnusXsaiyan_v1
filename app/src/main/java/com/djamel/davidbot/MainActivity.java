@@ -52,7 +52,8 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -70,6 +71,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+private static final int SCREEN_CAPTURE_REQUEST = 1001;
+private MediaProjectionManager mediaProjectionManager;
+private MediaProjection mediaProjection;
+    
     // ── Constants ────────────────────────────────────────────────────────
     private static final int    FILE_CHOOSER_REQUEST  = 1001;
     private static final int    IMAGE_PICK_REQUEST    = 1002;
