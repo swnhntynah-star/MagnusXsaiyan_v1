@@ -1805,6 +1805,18 @@ private MediaProjection mediaProjection;
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void requestScreenCapturePermission() {
+    if (mediaProjectionManager == null) return;
+
+    Intent captureIntent =
+            mediaProjectionManager.createScreenCaptureIntent();
+
+    startActivityForResult(
+            captureIntent,
+            SCREEN_CAPTURE_REQUEST
+    );
+    }
+    
     // ── Back Key ──────────────────────────────────────────────────────────
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
