@@ -1736,11 +1736,40 @@ input:checked+.slider::before{transform:translateX(21px);}
         <span style="font-size:11px;color:var(--t2)" id="log-count">0 سطر</span>
       </div>
       <div class="log-box" id="logBox"></div>
+    </div> 
+ </div>
+ <!-- ─── Differences / Screenshots ─────────────────── -->
+<div class="tab-pane" id="tab-differences">
+  <div class="card">
+    <div class="card-title">🪽 الفوارق</div>
+
+    <div style="color:var(--t2);font-size:12px;margin-bottom:14px;">
+      آخر لقطات الشاشة التي أرسلها التطبيق قبل إيقاف أو إعادة تشغيل البوت.
+    </div>
+
+    <div id="differences-status"
+         style="padding:12px;border-radius:12px;background:rgba(255,255,255,.05);
+                color:var(--t3);font-size:12px;margin-bottom:12px;">
+      لا توجد لقطات شاشة بعد.
+    </div>
+
+    <div id="differences-list"
+         style="display:flex;flex-direction:column;gap:12px;">
+    </div>
+
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn btn-primary" onclick="loadDifferences()">
+        🔄 تحديث
+      </button>
+      <button class="btn btn-ghost" onclick="clearDifferences()">
+        🗑️ مسح القائمة
+      </button>
     </div>
   </div>
+</div>   
 
-  <!-- ─── AI Command Generator ─────────────────────── -->
-  <div class="tab-pane" id="tab-ai">
+  <!-- ─── AI Command Generator ─────────────────────── --> 
+    <div class="tab-pane" id="tab-ai">
 
     <!-- Provider Badge -->
     <div id="aiProviderBadge" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;">
