@@ -2400,6 +2400,76 @@ function refreshCmdsIfOpen() {
 function populateActGrid(cmds) {
   // populated lazily in loadActConfig
 }
+  // ─── Differences / Screenshots ─────────────────────
+async function loadDifferences() {
+  const status = document.getElementById("differences-status");
+  const list = document.getElementById("differences-list");
+
+  if (!status || !list) return;
+
+  status.textContent = "⏳ جاري تحميل الصور…";
+  list.innerHTML = "";
+
+  try {
+    const r = await apiFetch("/api/differences");
+
+    if (!r || !r.ok) {
+      status.textContent = "❌ تعذر تحميل الصور";
+      return;
+    }
+
+    const files = r.files || [];
+
+    if (!files.length) {
+      status.textContent = "لا توجد لقطات شاشة بعد.";
+      return;
+    }
+
+    status.textContent = `📸 ${files.length} لقطة شاشة`;
+
+    list.innerHTML = files.map(file => `
+      <div class="card" style="padding:10px;">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">
+          ${esc(file.name)}
+        </div>
+
+        <img
+          src="${file.url}"
+          alt="${esc(file.name)}"
+          loading="lazy"
+          style="display:block;width:100%;max-height:500px;object-fit:contain;
+                 border-radius:12px;background:#000;"
+          onerror="this.style.display='none';"
+        >
+      </div>
+    `).join("");
+
+  } catch (e) {
+    console.error(e);
+    status.textContent = "❌ حدث خطأ أثناء تحميل الصور";
+  }
+}
+
+async function clearDifferences() {
+  if (!confirm("هل تريد مسح جميع لقطات الشاشة؟")) return;
+
+  try {
+    const r = await apiFetch("/api/differences", {
+      method: "DELETE"
+    });
+
+    if (!r || !r.ok) {
+      alert("❌ فشل مسح الصور");
+      return;
+    }
+
+    await loadDifferences();
+
+  } catch (e) {
+    console.error(e);
+    alert("❌ حدث خطأ أثناء المسح");
+  }
+}
 
 /* ─── Editor ─────────────────────────────────────── */
 function populateEditorSelect(cmds) {
