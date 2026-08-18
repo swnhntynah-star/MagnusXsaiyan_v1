@@ -2250,13 +2250,14 @@ function showLoginAgain() {
   document.getElementById("login-screen").classList.remove("hidden");
 }
 
-/* ─── Tab Navigation ─────────────────────────────── */
+ /* ─── Tab Navigation ─────────────────────────────── */
 function switchTab(name) {
   const prev = document.querySelector(".tab-pane.active");
   if (prev) {
     if (prev.id === "tab-" + name) return;
     prev.classList.remove("active");
   }
+
   const next = document.getElementById("tab-" + name);
   if (next) next.classList.add("active");
 
@@ -2265,11 +2266,35 @@ function switchTab(name) {
   });
 
   _prevTab = name;
+
   if (name === "commands" || name === "activation") loadCommandsQuiet();
   if (name === "messages") loadMessages();
-  if (name === "messenger") { loadMessengerThreads(); }
-  if (name === "logs") { const box = document.getElementById("logBox"); if (box && _autoScroll) box.scrollTop = box.scrollHeight; }
+  if (name === "messenger") loadMessengerThreads();
 
+  if (name === "logs") {
+    const box = document.getElementById("logBox");
+    if (box && _autoScroll) box.scrollTop = box.scrollHeight;
+  }
+
+  if (name === "differences") loadDifferences();
+
+  updateTabBackground(name);
+
+  requestAnimationFrame(() => {
+    const bn = document.querySelector(`.bn[data-tab="${name}"]`);
+    if (bn) {
+      bn.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center"
+      });
+    }
+  });
+}
+
+document.querySelectorAll("[data-tab]").forEach(el => {
+  el.addEventListener("click", () => switchTab(el.dataset.tab));
+});
   // ── Angel background + scroll active tab into view ──
   updateTabBackground(name);
   requestAnimationFrame(() => {
