@@ -229,6 +229,8 @@ private MediaProjection mediaProjection;
 
         setContentView(R.layout.activity_main);
 
+        mediaProjectionManager =
+        (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         prefs        = getSharedPreferences("david_prefs", MODE_PRIVATE);
         drawerLayout = findViewById(R.id.drawer_layout);
         progressBar  = findViewById(R.id.progress_bar);
