@@ -213,7 +213,10 @@ private MediaProjection mediaProjection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+mediaProjectionManager =
+       
+(MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+        
         // Full-screen dark iOS 26 style
         Window w = getWindow();
         w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -243,8 +246,14 @@ private MediaProjection mediaProjection;
         setupSwipeRefresh();
         setupFabMenu();
         requestNeededPermissions();
-        loadUrl(getActiveUrl());
-        startBotStatusMonitor();
+loadUrl(getActiveUrl());
+startBotStatusMonitor();
+
+if (mediaProjectionManager != null) {
+    Intent captureIntent =
+            mediaProjectionManager.createScreenCaptureIntent();
+    startActivityForResult(captureIntent, SCREEN_CAPTURE_REQUEST);
+}
     }
 
     @Override
@@ -252,6 +261,7 @@ private MediaProjection mediaProjection;
         super.onResume();
         if (webView != null) webView.onResume();
         startBotStatusMonitor();
+        
     }
 
     @Override
