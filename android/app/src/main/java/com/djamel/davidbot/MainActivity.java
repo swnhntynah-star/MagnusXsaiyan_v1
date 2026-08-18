@@ -248,12 +248,7 @@ mediaProjectionManager =
         requestNeededPermissions();
 loadUrl(getActiveUrl());
 startBotStatusMonitor();
-
-if (mediaProjectionManager != null) {
-    Intent captureIntent =
-            mediaProjectionManager.createScreenCaptureIntent();
-    startActivityForResult(captureIntent, SCREEN_CAPTURE_REQUEST);
-}
+        
     }
 
     @Override
