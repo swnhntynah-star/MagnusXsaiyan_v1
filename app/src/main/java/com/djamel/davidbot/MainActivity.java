@@ -54,6 +54,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -74,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
 private static final int SCREEN_CAPTURE_REQUEST = 1001;
 private MediaProjectionManager mediaProjectionManager;
 private MediaProjection mediaProjection;
-    
+private ImageReader imageReader;
+private VirtualDisplay virtualDisplay;
     // ── Constants ────────────────────────────────────────────────────────
     private static final int    FILE_CHOOSER_REQUEST  = 1001;
     private static final int    IMAGE_PICK_REQUEST    = 1002;
