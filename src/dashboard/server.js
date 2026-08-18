@@ -192,7 +192,54 @@ function startDashboard(port = 5000) {
     res.json({ ok: true });
   });
   app.get("/api/auth-check", auth, (_, res) => res.json({ ok: true }));
+  // ── 🪽 Differences / Screenshots ─────────────────────────────────────
+  const DIFFERENCES_DIR = path.join(ROOT, "screenshots");
+  fs.ensureDirSync(DIFFERENCES_DIR);
 
+  // عرض قائمة لقطات الشاشة
+  app.get("/api/differences", auth, (req, res) => {
+    try {
+      const files = fs.readdirSync(DIFFERENCES_DIR)
+        .filter(name => /\.(png|jpg|jpeg|webp)$/i.test(name))
+        .map(name => ({
+          name,
+          url: "/screenshots/" + encodeURIComponent(name),
+          createdAt: fs.statSync(path.join(DIFFERENCES_DIR, name)).mtimeMs
+        }))
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+      res.json({
+        ok: true,
+        files
+      });
+    } catch (e) {
+      res.status(500).json({
+        ok: false,
+        error: e.message
+      });
+    }
+  });
+
+  // مسح جميع لقطات الشاشة
+  app.delete("/api/differences", auth, (req, res) => {
+    try {
+      for (const name of fs.readdirSync(DIFFERENCES_DIR)) {
+        if (/\.(png|jpg|jpeg|webp)$/i.test(name)) {
+          fs.removeSync(path.join(DIFFERENCES_DIR, name));
+        }
+      }
+
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({
+        ok: false,
+        error: e.message
+      });
+    }
+  });
+
+  // السماح للداشبورد بعرض الصور
+  app.use("/screenshots", express.static(DIFFERENCES_DIR));
   // ── Stats ───────────────────────────────────────────────────────────────────
   app.get("/api/stats",  auth, (_, res) => res.json(getStats()));
   app.get("/api/status", auth, (_, res) => {
