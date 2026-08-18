@@ -1,8 +1,10 @@
 /**
- * DAVID V1 — /uptime — وقت تشغيل البوت مع إحصائيات
- * Copyright © 2025 DJAMEL
+ * SAIYAN — /uptime
+ * Copyright © 2026 Magnus
+ * ✦ عرض حالة النظام ومدة التشغيل
  */
 "use strict";
+
 const os = require("os");
 
 function formatUptime(ms) {
@@ -11,49 +13,109 @@ function formatUptime(ms) {
   const h = Math.floor((s % 86400) / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
+
   const parts = [];
+
   if (d) parts.push(`${d} يوم`);
   if (h) parts.push(`${h} ساعة`);
   if (m) parts.push(`${m} دقيقة`);
+
   parts.push(`${sec} ثانية`);
+
   return parts.join(" و ");
 }
 
 module.exports = {
   config: {
-    name: "uptime", aliases: ["up","ping","وقت"], version: "2.0", author: "DJAMEL",
-    countDown: 5, role: 2, category: "info",
-    description: "عرض وقت تشغيل البوت مع الإحصائيات",
-    guide: { en: "{pn} — عرض الإحصائيات" }
+    name: "uptime",
+    aliases: ["up", "ping", "وقت"],
+    version: "3.1",
+    author: "Magnus",
+    countDown: 5,
+    role: 2,
+    category: "info",
+
+    description:
+      "عرض مدة تشغيل Saiyan ومعلومات النظام",
+
+    guide: {
+      en: "{pn} — عرض حالة النظام"
+    }
   },
 
-  onStart: async function({ api, event, message }) {
-    const start = global.GoatBot?.startTime || Date.now();
-    const upMs  = Date.now() - start;
-    const mem   = process.memoryUsage();
-    const sysM  = { total: os.totalmem(), free: os.freemem() };
-    const cmds  = global.GoatBot?.commands?.size || 0;
-    const uid   = global.GoatBot?.botID || "—";
-    const prefix = global.GoatBot?.config?.prefix || "/";
+  onStart: async function({
+    api,
+    event,
+    message
+  }) {
 
-    const ping = Date.now();
-    await new Promise(r => setTimeout(r, 10));
-    const pong = Date.now() - ping;
+    const start =
+      global.GoatBot?.startTime ||
+      Date.now();
+
+    const uptime =
+      Date.now() - start;
+
+    const mem =
+      process.memoryUsage();
+
+    const system = {
+      total: os.totalmem(),
+      free: os.freemem()
+    };
+
+    const commands =
+      global.GoatBot?.commands?.size || 0;
+
+    const botID =
+      global.GoatBot?.botID || "غير معروف";
+
+    const prefix =
+      global.GoatBot?.config?.prefix || "/";
+
+    const testStart = Date.now();
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 10)
+    );
+
+    const responseTime =
+      Date.now() - testStart;
 
     const lines = [
-      `╔════ DAVID V1 — Status ════╗`,
-      `║ 🤖 Bot ID: ${uid}`,
-      `║ ⏱ Uptime: ${formatUptime(upMs)}`,
-      `║ 🏓 Ping: ${pong}ms`,
-      `║ 📦 Commands: ${cmds}`,
-      `║ 💾 RAM Used: ${(mem.heapUsed/1048576).toFixed(1)} MB`,
-      `║ 💻 System RAM: ${((sysM.total-sysM.free)/1073741824).toFixed(2)}/${(sysM.total/1073741824).toFixed(2)} GB`,
-      `║ 🛡 Protection: 20 طبقة نشطة`,
-      `║ 🔑 Prefix: ${prefix}`,
-      `║ 👑 By: DJAMEL`,
-      `╚══════════════════════════╝`
+
+      "╔════════════════════╗",
+      "║      ⚡ SAIYAN ⚡",
+      "║    SYSTEM MONITOR",
+      "╚════════════════════╝",
+
+      "",
+
+      `🆔 المعرّف: ${botID}`,
+      `🕰️ وقت العمل: ${formatUptime(uptime)}`,
+      `📡 سرعة الرد: ${responseTime}ms`,
+      `🧩 الأوامر: ${commands}`,
+      `💿 ذاكرة العملية: ${(mem.heapUsed / 1048576).toFixed(1)} MB`,
+      `🖥️ ذاكرة الجهاز: ${((system.total - system.free) / 1073741824).toFixed(2)} / ${(system.total / 1073741824).toFixed(2)} GB`,
+      `🔰 البادئة: ${prefix}`,
+
+      "",
+
+      "┌────────────────────┐",
+      "│ 🟢 النظام متصل",
+      "│ ✨ جميع الخدمات تعمل",
+      "│ 🔋 الأداء مستقر",
+      "└────────────────────┘",
+
+      "",
+
+      "🌌 SAIYAN CORE",
+      "🛠️ Developed by Magnus"
+
     ];
 
-    message.reply(lines.join("\n"));
+    return message.reply(
+      lines.join("\n")
+    );
   }
 };
