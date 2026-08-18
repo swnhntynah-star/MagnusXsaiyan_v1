@@ -1,5 +1,6 @@
 package com.djamel.davidbot;
-
+import android.media.projection.MediaProjectionManager;
+import android.media.projection.MediaProjection;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -69,7 +70,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+private static final int SCREEN_CAPTURE_REQUEST = 1001;
 
+private MediaProjectionManager mediaProjectionManager;
+private MediaProjection mediaProjection;
     // ── Constants ────────────────────────────────────────────────────────
     private static final int    FILE_CHOOSER_REQUEST  = 1001;
     private static final int    IMAGE_PICK_REQUEST    = 1002;
