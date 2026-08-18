@@ -1739,6 +1739,33 @@ public class MainActivity extends AppCompatActivity {
     // ── Activity Results ──────────────────────────────────────────────────
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SCREEN_CAPTURE_REQUEST) {
+
+    if (resultCode == Activity.RESULT_OK && data != null) {
+
+        mediaProjection =
+                mediaProjectionManager.getMediaProjection(
+                        resultCode,
+                        data
+                );
+
+        Toast.makeText(
+                this,
+                "✅ تم السماح بالتقاط الشاشة",
+                Toast.LENGTH_SHORT
+        ).show();
+
+    } else {
+
+        Toast.makeText(
+                this,
+                "❌ لم يتم السماح بالتقاط الشاشة",
+                Toast.LENGTH_SHORT
+        ).show();
+    }
+
+    return;
+        }
         if (requestCode == FILE_CHOOSER_REQUEST && fileCallback != null) {
             Uri[] results = null;
             if (resultCode == Activity.RESULT_OK && data != null)
